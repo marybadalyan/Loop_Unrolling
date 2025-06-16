@@ -97,29 +97,31 @@ jobs:
         shell: bash
         run: |
           executable="loop_unrolling"
-          # --- Setup variables for this executable ---
           executable_name=""
-          analysis_file="analysis.txt"
-            opt_level="${{ github.event.inputs.opt_level || 'O3' }}"
+          analysis_dir="analysis" # Define the directory name as a variable
+          
+          # FIX #2: Create the analysis directory before trying to use it.
+          mkdir -p "${analysis_dir}"
+          
+          opt_level="${{ github.event.inputs.opt_level || 'O3' }}"
 
-            if [ "$RUNNER_OS" == "Windows" ]; then
-              executable_name="${{ matrix.build_type }}/${executable}.exe"
-            else
-              executable_name="${executable}"
-            fi
-            
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            executable_name="${{ matrix.build_type }}/${executable}.exe"
+          else
+            executable_name="${executable}"
+          fi
+          
+          # Make the analysis file name unique based on the opt_level.
+          analysis_file="${analysis_dir}/assembly_${opt_level}.txt"
 
-            ANALYSIS_PATH="analysis/${analysis_file}"
+          echo "--------------------------------------------------"
+          echo "Running ${executable_name}..."
+          echo "Analysis will be saved to: ${analysis_file}"
 
-            echo "--------------------------------------------------"
-            echo "Running ${executable}..."
-
-            # --- Run the executable with all required arguments ---
-            if [ -f "${executable_name}" ]; then
-              # Pass the analysis path (ARG 1) and optimization level (ARG 2)
-              "./${executable_name}" "${ANALYSIS_PATH}" "${opt_level}"
-            else
-              echo "Error: Executable not found: $(pwd)/${executable_name}"
-              exit 1
-            fi
-          done
+          if [ -f "${executable_name}" ]; then
+            # Pass the analysis path (ARG 1) and optimization level (ARG 2)
+            "./${executable_name}" "${analysis_file}" "${opt_level}"
+          else
+            echo "Error: Executable not found: $(pwd)/${executable_name}"
+            exit 1
+          fi
