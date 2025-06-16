@@ -1,5 +1,4 @@
-# This starter workflow is for a CMake project running on multiple platforms. There is a different starter workflow if you just want a single platform.
-# See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-single-platform.yml
+# This starter workflow is for a CMake project running on multiple platforms.
 name: CMake on multiple platforms
 
 on:
@@ -7,6 +6,15 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  
+  # FIX #1: Added the workflow_dispatch trigger so you can run it manually.
+  workflow_dispatch:
+    inputs:
+      opt_level:
+        description: 'Optimization Level (e.g., O2, O3, Os)'
+        required: true
+        default: 'O3' # Default to O3 for manual runs
+        type: string
 
 jobs:
   build:
@@ -16,25 +24,17 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        build_type: [Release]
-        c_compiler: [gcc, clang, cl]
+        build_type: [Release, Debug]
+        
+        # IMPROVEMENT: The 'include' key is sufficient to define all valid
+        # combinations, so the 'exclude' block has been removed for clarity.
         include:
           - os: windows-latest
-            c_compiler: cl
             cpp_compiler: cl
           - os: ubuntu-latest
-            c_compiler: gcc
             cpp_compiler: g++
           - os: ubuntu-latest
-            c_compiler: clang
             cpp_compiler: clang++
-        exclude:
-          - os: windows-latest
-            c_compiler: gcc
-          - os: windows-latest
-            c_compiler: clang
-          - os: ubuntu-latest
-            c_compiler: cl
 
     steps:
       - uses: actions/checkout@v4
@@ -46,13 +46,17 @@ jobs:
           echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
       - name: Configure CMake
-        run: >
-          cmake -B ${{ steps.strings.outputs.build-output-dir }}
-          -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          -S ${{ github.workspace }}
-  # -DCMAKE_CXX_FLAGS_RELEASE="-${{ github.event.inputs.opt_level }} -DNDEBUG" #here you can change the optimization flags for Release build
+        shell: bash
+        run: |
+          # FIX #2: Provide a default value for automated (push/pr) runs.
+          # If the manual input is empty, default to 'O3'.
+          OPT_LEVEL="${{ github.event.inputs.opt_level || 'O3' }}"
+
+          cmake -B ${{ steps.strings.outputs.build-output-dir }} \
+            -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DCMAKE_CXX_FLAGS_RELEASE="-${OPT_LEVEL} -DNDEBUG" \
+            -S ${{ github.workspace }}
 
       - name: Build
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
@@ -62,26 +66,32 @@ jobs:
         run: ctest --build-config ${{ matrix.build_type }}
 
       - name: Run Executables and Analyze
+        # This step will only run for Release builds to avoid redundancy.
+        if: matrix.build_type == 'Release'
         working-directory: ${{ steps.strings.outputs.build-output-dir }}
         shell: bash
         run: |
           exe="loop_unrolling"
           analysis_dir="analysis"
           mkdir -p "${analysis_dir}"
-
+          
+          # FIX #3: Use the same default value logic for consistency.
+          opt_level="${{ github.event.inputs.opt_level || 'O3' }}"
+          
           if [ "$RUNNER_OS" == "Windows" ]; then
             executable_name="${{ matrix.build_type }}/${exe}.exe"
           else
             executable_name="${exe}"
           fi
 
-          analysis_file="${analysis_dir}/assembly.txt"
+          analysis_file="${analysis_dir}/assembly_${opt_level}.txt"
 
           echo "--------------------------------------------------"
           echo "Running ${executable_name}..."
+          echo "Analysis will be saved to: ${analysis_file}"
 
           if [ -f "${executable_name}" ]; then
-            "./${executable_name}" "${analysis_file}"
+            "./${executable_name}" "${analysis_file}" "${opt_level}"
           else
             echo "Error: Executable not found: $(pwd)/${executable_name}"
             exit 1
