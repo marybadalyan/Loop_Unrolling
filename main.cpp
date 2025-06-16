@@ -78,12 +78,13 @@ int main(int argc, char* argv[]) {
         my_array[i] = i % 10;
     }
 
-    if (argc != 2) {
+    if (argc != 3) {
         std::cerr << "Usage: " << argv[0] << " <assembly_file_path>" << std::endl;
         return 1;
     }
     std::string assemblyFilePath = argv[1];
-    
+    std::string optLevel = argv[2];
+    std::cout << Color::BOLD_MAGENTA << "Optimization Level: " << optLevel << Color::RESET << std::endl;
 
      
     auto start = std::chrono::high_resolution_clock::now();
