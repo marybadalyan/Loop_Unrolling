@@ -112,7 +112,7 @@ jobs:
           fi
           
           # Make the analysis file name unique based on the opt_level.
-          analysis_file="${analysis_dir}/assembly_${opt_level}.txt"
+          analysis_file="${analysis_dir}/assembly.txt"
 
           echo "--------------------------------------------------"
           echo "Running ${executable_name}..."
