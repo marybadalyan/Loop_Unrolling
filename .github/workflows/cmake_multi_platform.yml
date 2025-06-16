@@ -57,16 +57,35 @@ jobs:
       - name: Configure CMake
         shell: bash
         run: |
-          # FIX #2: Provide a default value for automated (push/pr) runs.
-          # If the manual input is empty, default to 'O3'.
+          # Set the base optimization level from manual input or default to 'O3'
           OPT_LEVEL="${{ github.event.inputs.opt_level || 'O3' }}"
+
+          # --- THIS IS THE FIX ---
+          # Define a variable for our flags and set it based on the compiler
+          CXX_FLAGS=""
+          if [ "${{ matrix.cpp_compiler }}" == "cl" ]; then
+            # MSVC uses /O1, /O2, or /Ox. Let's map O3 to the equivalent /Ox.
+            if [ "$OPT_LEVEL" == "O3" ]; then
+              CXX_FLAGS="/Ox /DNDEBUG"
+            else
+              # This will handle O1 -> /O1, O2 -> /O2
+              CXX_FLAGS="/${OPT_LEVEL} /DNDEBUG"
+            fi
+          else
+            # GCC and Clang use the hyphen format
+            CXX_FLAGS="-${OPT_LEVEL} -DNDEBUG"
+          fi
+          # --- END OF FIX ---
+
+          # This line is great for debugging! It shows which flags are being used.
+          echo "Using CXX flags for ${{ matrix.cpp_compiler }}: ${CXX_FLAGS}"
 
           cmake -B ${{ steps.strings.outputs.build-output-dir }} \
             -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-            -DCMAKE_CXX_FLAGS_RELEASE="-${OPT_LEVEL} -DNDEBUG" \
+            -DCMAKE_CXX_FLAGS_RELEASE="${CXX_FLAGS}" \
             -S ${{ github.workspace }}
-
+            
       - name: Build
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
@@ -84,7 +103,7 @@ jobs:
           analysis_dir="analysis"
           mkdir -p "${analysis_dir}"
           
-          # FIX #3: Use the same default value logic for consistency.
+        
           opt_level="${{ github.event.inputs.opt_level || 'O3' }}"
           
           if [ "$RUNNER_OS" == "Windows" ]; then
