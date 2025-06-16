@@ -51,8 +51,8 @@ jobs:
           -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          -DCMAKE_CXX_FLAGS_RELEASE="-${{ github.event.inputs.opt_level }} -DNDEBUG" #here you can change the optimization flags for Release build
           -S ${{ github.workspace }}
+  # -DCMAKE_CXX_FLAGS_RELEASE="-${{ github.event.inputs.opt_level }} -DNDEBUG" #here you can change the optimization flags for Release build
 
       - name: Build
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
@@ -68,7 +68,6 @@ jobs:
           exe="inlining_test"
           analysis_dir="analysis"
           mkdir -p "${analysis_dir}"
-          opt_level="${{ github.event.inputs.opt_level }}"
           
           if [ "$RUNNER_OS" == "Windows" ]; then
             executable_name="${{ matrix.build_type }}/${exe}.exe"
@@ -86,7 +85,7 @@ jobs:
           echo "Analysis will be saved to: ${analysis_file}"
 
           if [ -f "${executable_name}" ]; then
-            "./${executable_name}" "${analysis_file}" "${opt_level}" # Quoting is safest
+            "./${executable_name}" "${analysis_file}"  
           else
             echo "Error: Executable not found: $(pwd)/${executable_name}"
             exit 1
