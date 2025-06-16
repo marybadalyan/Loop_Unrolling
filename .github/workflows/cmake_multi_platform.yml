@@ -68,24 +68,20 @@ jobs:
           exe="loop_unrolling"
           analysis_dir="analysis"
           mkdir -p "${analysis_dir}"
-          
+
           if [ "$RUNNER_OS" == "Windows" ]; then
             executable_name="${{ matrix.build_type }}/${exe}.exe"
           else
             executable_name="${exe}"
           fi
 
-          # --- SUGGESTED CHANGE ---
-          # Create a unique analysis file for each optimization level
-          analysis_file="${analysis_dir}/assembly_${opt_level}.txt"
-          # ------------------------
+          analysis_file="${analysis_dir}/assembly_${{ matrix.build_type }}.txt"
 
           echo "--------------------------------------------------"
           echo "Running ${executable_name}..."
-          echo "Analysis will be saved to: ${analysis_file}"
 
           if [ -f "${executable_name}" ]; then
-            "./${executable_name}" "${analysis_file}"  
+            "./${executable_name}" "${analysis_file}"
           else
             echo "Error: Executable not found: $(pwd)/${executable_name}"
             exit 1
