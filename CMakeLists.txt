@@ -11,15 +11,6 @@ add_executable(loop_unrolling main.cpp)
 set(ANALYSIS_DIR "${CMAKE_BINARY_DIR}/analysis")
 file(MAKE_DIRECTORY ${ANALYSIS_DIR})
 
-if(MSVC)
-    # Windows/MSVC specific flags
-    # NOTE: I changed /O0 to /Od, which is the standard "Disable Optimizations" flag for MSVC
-    target_compile_options(loop_unrolling PRIVATE /O2)
-else()
-    # Linux/GCC/Clang specific flags
-    target_compile_options(loop_unrolling PRIVATE -O2)
-endif()
-
 
 # --- Let CMake handle the optimization flags ---
 # We don't need to set /Od or /O2 manually. CMake does this for us
