@@ -84,7 +84,7 @@ jobs:
             executable_name="${exe}"
           fi
 
-          analysis_file="${analysis_dir}/assembly_${opt_level}.txt"
+          analysis_file="${analysis_dir}/assembly.txt"
 
           echo "--------------------------------------------------"
           echo "Running ${executable_name}..."
