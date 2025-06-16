@@ -65,7 +65,7 @@ jobs:
         working-directory: ${{ steps.strings.outputs.build-output-dir }}
         shell: bash
         run: |
-          exe="inlining_test"
+          exe="loop_unrolling"
           analysis_dir="analysis"
           mkdir -p "${analysis_dir}"
           
