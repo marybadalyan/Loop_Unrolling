@@ -78,12 +78,12 @@ int main(int argc, char* argv[]) {
         my_array[i] = i % 10;
     }
 
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " <assembly_file_path> <optimization_level>" << std::endl;
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " <assembly_file_path>" << std::endl;
         return 1;
     }
     std::string assemblyFilePath = argv[1];
-    std::string optLevel = argv[2];
+    
 
      
     auto start = std::chrono::high_resolution_clock::now();
@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
     std::chrono::duration<double> elapsed = end - start;
 
     std::cout << Color::BOLD_CYAN << "Assembly Path:      " << assemblyFilePath << Color::RESET << std::endl;
-    std::cout << Color::BOLD_MAGENTA << "Optimization Level: " << optLevel <<   Color::RESET << std::endl;
+    // std::cout << Color::BOLD_MAGENTA << "Optimization Level: " << optLevel <<   Color::RESET << std::endl;
     std::cout << Color::BOLD_YELLOW << "Time Taken:         " << elapsed.count() << " seconds" << Color::RESET <<  std::endl;
     // By printing the result, we guarantee to the compiler that the work was necessary.
     std::cout << Color::BOLD_YELLOW << "Final Result:       " << final_result << Color::RESET << std::endl;
@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
     elapsed = end - start;
 
     std::cout << Color::BOLD_CYAN << "Assembly Path:      " << assemblyFilePath << Color::RESET << std::endl;
-    std::cout << Color::BOLD_MAGENTA << "Optimization Level: " << optLevel <<   Color::RESET << std::endl;
+    // std::cout << Color::BOLD_MAGENTA << "Optimization Level: " << optLevel <<   Color::RESET << std::endl;
     std::cout << Color::BOLD_YELLOW << "Time Taken:         " << elapsed.count() << " seconds" << Color::RESET <<  std::endl;
     // By printing the result, we guarantee to the compiler that the work was necessary.
     std::cout << Color::BOLD_YELLOW << "Final Result:       " << final_result << Color::RESET << std::endl;
