@@ -51,10 +51,12 @@ jobs:
           OPT_LEVEL="${{ github.event.inputs.opt_level || 'O3' }}"
 
           if [[ "${{ matrix.cpp_compiler }}" == "cl" ]]; then
-            # Windows with MSVC (cl)
-            CXX_FLAGS="/${OPT_LEVEL} /DNDEBUG"
-            echo "MSVC Flags: ${CXX_FLAGS}"
-
+            if [[ "$OPT_LEVEL" == "O3" ]]; then
+                CXX_FLAGS="/Ox /DNDEBUG"
+              else
+                CXX_FLAGS="/${OPT_LEVEL} /DNDEBUG"
+              fi
+            
             cmake -B build \
               -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
               -DCMAKE_CXX_FLAGS_RELEASE="${CXX_FLAGS}" \
