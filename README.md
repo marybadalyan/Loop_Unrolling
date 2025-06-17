@@ -122,4 +122,3 @@ Assembly Lines:     52 instructions
 ```
 
 Notice that **`sum_array_unrolled` takes less time but has more assembly instructions**, clearly illustrating the performance-for-size trade-off of loop unrolling.
-```
