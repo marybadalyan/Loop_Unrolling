@@ -74,10 +74,12 @@ jobs:
           echo "Using CXX flags for Release: ${CXX_FLAGS}" # Added for debugging
 
           # Now the cmake command can correctly use the CXX_FLAGS variable
-          cmake -B \
-            -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
-            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-            -DCMAKE_CXX_FLAGS_RELEASE="${CXX_FLAGS}" 
+          cmake -B ${{ steps.strings.outputs.build-output-dir }}
+          -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DCMAKE_CXX_FLAGS_RELEASE="${CXX_FLAGS}" 
+          -S ${{ github.workspace }}
 
       - name: Build
         # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
@@ -98,7 +100,6 @@ jobs:
           executable_name=""
           analysis_dir="analysis" # Define the directory name as a variable
           
-          # FIX #2: Create the analysis directory before trying to use it.
           mkdir -p "${analysis_dir}"
           
           opt_level="${{ github.event.inputs.opt_level || 'O3' }}"
