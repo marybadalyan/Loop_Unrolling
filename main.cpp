@@ -73,8 +73,8 @@ void analyze_disassembly(const std::string& assemblyFilePath,const std::string& 
 }
 
 int main(int argc, char* argv[]) {
-    int32_t my_array[1024];
-    for(int i = 0; i < 1024; ++i) {
+    int32_t my_array[1000000];
+    for(int i = 0; i < 1000000; ++i) {
         my_array[i] = i % 10;
     }
 
