@@ -74,6 +74,48 @@ add_custom_command(
 )
 ```
 
+
+### How to Build and Run
+#### Prerequisites
+- A C++ compiler (GCC, Clang, or MSVC)
+- CMake (version 3.10 or higher)
+- git (to clone the repository)
+
+#### Steps
+Clone the repository:
+
+```bash
+git clone `Loop_Unrolling`
+cd `Loop_Unrolling`
+```
+
+Configure the project using CMake:
+This will create a build directory and generate the build files for your system.
+
+```bash
+cmake -B build
+```
+Build the executables:
+This will compile main.cpp twice with the different optimization flags and run the post-build commands to generate the assembly files.
+
+```bash
+cmake --build build
+```
+
+Run the analysis:
+The final executables need to be run from the build directory. You must provide the path to the assembly file and the optimization level string as arguments.
+
+
+# Run the optimized version
+
+```bash
+./build/Release/loop_unrolling.exe  build//analysis//assembly.txt O2
+```
+
+You will see the colored output in your terminal, comparing the performance and code size of the two optimization levels.
+
+
+
 ### Expected Output
 
 When you run the program, you will see output similar to this:
@@ -120,5 +162,7 @@ Final Result:       4596
 
 Assembly Lines:     52 instructions
 ```
+
+
 
 Notice that **`sum_array_unrolled` takes less time but has more assembly instructions**, clearly illustrating the performance-for-size trade-off of loop unrolling.
