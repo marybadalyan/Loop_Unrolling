@@ -1,4 +1,5 @@
-# This starter workflow is for a CMake project running on multiple platforms.
+# This starter workflow is for a CMake project running on multiple platforms. There is a different starter workflow if you just want a single platform.
+# See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-single-platform.yml
 name: CMake on multiple platforms
 
 on:
@@ -6,25 +7,16 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  # FIX: Added the workflow_dispatch trigger so your manual inputs will work.
-  workflow_dispatch:
-    inputs:
-      opt_level:
-        description: 'Optimization Level (e.g., O2, O3, Os)'
-        required: true
-        default: 'O3'
-        type: string
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
 
     strategy:
-      # YOUR MATRIX: Unchanged, as requested.
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        build_type: [Release]
+        build_type: [Release, Debug]
         c_compiler: [gcc, clang, cl]
         include:
           - os: windows-latest
@@ -47,7 +39,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # FIX: The "Set reusable strings" step has been REMOVED as it was the source of the path errors.
+      - name: Set reusable strings
+        id: strings
+        shell: bash
+        run: |
+          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
       - name: Configure CMake
         shell: bash
@@ -72,14 +68,22 @@ jobs:
           # This is now a single, long command to avoid line continuation issues.
           cmake -B build -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_CXX_FLAGS_RELEASE="${CXX_FLAGS}"
 
+
+          
       - name: Build
-        # FIX: Using the consistent relative path 'build'.
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
       - name: Test
-        # FIX: Using the consistent relative path 'build'.
         working-directory: ${{ steps.strings.outputs.build-output-dir }}
         run: ctest --build-config ${{ matrix.build_type }}
+
+      - name: Debug - List ALL Files in Workspace
+        if: always()
+        shell: bash
+        run: |
+          echo "--- Listing ALL files in the entire workspace (${{ github.workspace }}) ---"
+          ls -R "${{ github.workspace }}"
+          echo "--------------------------------------------------------------------"
 
       - name: Run Executables and Analyze
         if: matrix.build_type == 'Release'
