@@ -55,10 +55,11 @@ jobs:
           echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
 
-      - name: Configure CMake Flags
-        shell: bash # Explicitly setting the shell is good practice
+      - name: Set Compiler Flags
+        id: set_flags # Optional ID for clarity
+        shell: bash
         run: |
-          echo "-----------------------------------" # Added for debugging
+          echo "-----------------------------------"
           # Set the base optimization level from manual input or default to 'O3'
           OPT_LEVEL="${{ github.event.inputs.opt_level || 'O3' }}"
           CXX_FLAGS=""
@@ -68,28 +69,26 @@ jobs:
             if [ "$OPT_LEVEL" == "O3" ]; then
               CXX_FLAGS="/Ox /DNDEBUG"
             else
-              # This correctly handles other levels like O2 -> /O2
               CXX_FLAGS="/${OPT_LEVEL} /DNDEBUG"
             fi
           else
-            # GCC and Clang use -O flags. This part was already correct.
             CXX_FLAGS="-${OPT_LEVEL} -DNDEBUG"
           fi
-          # ----------------------------------------------------
           
-          echo "Using CXX flags for Release: ${CXX_FLAGS}" # Added for debugging
-
+          echo "Determined CXX flags: ${CXX_FLAGS}"
+          
+          # THIS IS THE FIX: Export the variable for subsequent steps
+          echo "CXX_FLAGS=${CXX_FLAGS}" >> $GITHUB_ENV
 
       - name: Configure CMake
-        shell: bash # Explicitly setting the shell is good practice
+        shell: bash
         run: >
-          # Now the cmake command can correctly use the CXX_FLAGS variable
-          cmake -B ${{ steps.strings.outputs.build-output-dir }} 
-          -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} 
-          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} 
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} 
-          -DCMAKE_CXX_FLAGS_RELEASE="${CXX_FLAGS}" 
-          -S ${{ github.workspace }}
+          cmake -B build
+          -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DCMAKE_CXX_FLAGS_RELEASE="${{ env.CXX_FLAGS }}"
+          
 
       - name: Build
         # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
