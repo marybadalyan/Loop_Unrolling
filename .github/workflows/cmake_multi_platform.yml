@@ -49,31 +49,28 @@ jobs:
 
       # FIX: The "Set reusable strings" step has been REMOVED as it was the source of the path errors.
 
-      - name: Set Compiler Flags
-        id: set_flags
+      - name: Configure CMake
         shell: bash
         run: |
+          # 1. Determine the correct flags based on the compiler
+          # This logic is performed inside the same step that runs cmake.
           OPT_LEVEL="${{ github.event.inputs.opt_level || 'O3' }}"
           CXX_FLAGS=""
           if [ "${{ matrix.cpp_compiler }}" == "cl" ]; then
             if [ "$OPT_LEVEL" == "O3" ]; then
-              CXX_FLAGS="/DNDEBUG"
+              CXX_FLAGS="/Ox /DNDEBUG"
             else
               CXX_FLAGS="/${OPT_LEVEL} /DNDEBUG"
             fi
           else
             CXX_FLAGS="-${OPT_LEVEL} -DNDEBUG"
           fi
-          echo "CXX_FLAGS=${CXX_FLAGS}" >> $GITHUB_ENV
           
-      - name: Configure CMake
-        shell: bash
-        run: >
-          cmake -B build 
-            -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} 
-            -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} 
-            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} 
-            -DCMAKE_CXX_FLAGS_RELEASE="${{ env.CXX_FLAGS }}"
+          echo "Using CXX flags for Release: ${CXX_FLAGS}"
+
+          # 2. Run CMake using the flags we just defined in this script.
+          # This is now a single, long command to avoid line continuation issues.
+          cmake -B build -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_CXX_FLAGS_RELEASE="${CXX_FLAGS}"
 
       - name: Build
         # FIX: Using the consistent relative path 'build'.
