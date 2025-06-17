@@ -1,15 +1,11 @@
-Of course. I cannot generate a physical file, but I can provide the complete content formatted in Markdown. You can copy and paste this directly into a new file and save it as `README.md`.
 
-Here is the content for the `README.md` file:
-
-```markdown
 # Loop Unrolling: Performance vs. Code Size Demo
 
 This project demonstrates the concept of **loop unrolling**, a compiler optimization technique that can improve the performance of a program at the cost of increased binary size.
 
 The program (`main.cpp`) times two functions: one with a standard loop and another with a manually unrolled loop. After execution, it analyzes the generated assembly code to show the difference in the number of instructions.
 
----
+
 
 ## What is Loop Unrolling?
 
@@ -25,7 +21,7 @@ By "unrolling" the loop, you perform more work per iteration. For example, inste
 * ✅ **More Efficient Time:** Fewer control instructions mean the CPU spends more of its time doing useful work, leading to faster execution.
 * ❌ **Bigger Assembly:** Duplicating the work inside the loop body results in more lines of machine code, increasing the final size of the executable.
 
----
+
 
 ## How This Project Works
 
