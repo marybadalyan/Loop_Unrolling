@@ -57,7 +57,7 @@ jobs:
           CXX_FLAGS=""
           if [ "${{ matrix.cpp_compiler }}" == "cl" ]; then
             if [ "$OPT_LEVEL" == "O3" ]; then
-              CXX_FLAGS="/Ox /DNDEBUG"
+              CXX_FLAGS="/DNDEBUG"
             else
               CXX_FLAGS="/${OPT_LEVEL} /DNDEBUG"
             fi
@@ -68,14 +68,11 @@ jobs:
           
       - name: Configure CMake
         shell: bash
-        run: |
-          echo "Using CXX flags for Release: ${{ env.CXX_FLAGS }}"
-          
-          # FIX: Using the simple, relative path 'build' consistently. The -S argument is not needed.
-          cmake -B build \
-            -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
-            -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
-            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+        run: >
+          cmake -B build 
+            -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} 
+            -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} 
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} 
             -DCMAKE_CXX_FLAGS_RELEASE="${{ env.CXX_FLAGS }}"
 
       - name: Build
@@ -106,7 +103,7 @@ jobs:
             executable_name="${executable}"
           fi
 
-          analysis_file="${analysis_dir}/assembly_${opt_level}.txt"
+          analysis_file="${analysis_dir}/assembly.txt"
 
           echo "Running ${executable_name} to generate ${analysis_file}"
 
