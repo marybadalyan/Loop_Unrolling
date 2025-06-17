@@ -78,13 +78,13 @@ jobs:
 
       - name: Test
         # FIX: Using the consistent relative path 'build'.
-        working-directory: build
+        working-directory: ${{ steps.strings.outputs.build-output-dir }}
         run: ctest --build-config ${{ matrix.build_type }}
 
       - name: Run Executables and Analyze
         if: matrix.build_type == 'Release'
         # FIX: Using the consistent relative path 'build'.
-        working-directory: build
+        working-directory: ${{ steps.strings.outputs.build-output-dir }}
         shell: bash
         run: |
           executable="loop_unrolling"
